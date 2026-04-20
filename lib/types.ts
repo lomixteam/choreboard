@@ -36,6 +36,8 @@ export interface Reward {
   name: string
   threshold_minutes: number
   unlimited: boolean
+  type: 'redeemable' | 'trigger'
+  cost_minutes: number | null
   active: boolean
 }
 

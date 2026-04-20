@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&subset=latin,latin-ext&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Lora', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
 
   --ink: #1a1a2e;
   --paper: #f5f0e8;
@@ -34,12 +34,10 @@ h1, h2, h3 {
   font-family: var(--font-display);
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--cream); }
 ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 3px; }
 
-/* Transitions */
 * { transition-property: background-color, border-color, opacity, transform;
     transition-duration: 150ms;
     transition-timing-function: ease; }

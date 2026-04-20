@@ -334,7 +334,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         ))}
 
         {/* Spend timer */}
-        <SpendTimer availableMinutes={myMinutes} rewards={rewards.filter(r => r.unlimited || myMinutes >= r.threshold_minutes)} userId={session.userId} />
+        <SpendTimer availableMinutes={myMinutes} rewards={rewards.filter(r => (r.type === 'redeemable' || !r.type) && (r.unlimited || myMinutes >= r.threshold_minutes))} userId={session.userId} />
 
         {/* Rewards */}
         {rewards.length > 0 && (
