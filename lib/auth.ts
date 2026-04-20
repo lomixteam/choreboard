@@ -5,7 +5,6 @@ import { SessionUser } from './types'
 const secret = new TextEncoder().encode(process.env.JWT_SECRET!)
 
 export async function createSession(user: SessionUser): Promise<string> {
-  // SignJWT requires a plain object with index signature, spread to satisfy it
   return new SignJWT({ userId: user.userId, role: user.role, name: user.name })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('30d')
@@ -14,7 +13,8 @@ export async function createSession(user: SessionUser): Promise<string> {
 
 export async function getSession(): Promise<SessionUser | null> {
   try {
-    const token = cookies().get('session')?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get('session')?.value
     if (!token) return null
     const { payload } = await jwtVerify(token, secret)
     return {

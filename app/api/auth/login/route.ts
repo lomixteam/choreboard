@@ -33,10 +33,11 @@ export async function POST(req: NextRequest) {
       name: user.name,
     })
 
-    cookies().set('session', token, {
+    const cookieStore = await cookies()
+    cookieStore.set('session', token, {
       httpOnly: true,
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: '/',
     })
 
