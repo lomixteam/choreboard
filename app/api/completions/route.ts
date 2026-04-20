@@ -1,0 +1,130 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import { requireSession } from '@/lib/auth'
+import { getWeekStart, getWeekEnd } from '@/lib/utils'
+
+export async function GET(req: NextRequest) {
+  try {
+    await requireSession()
+    const { searchParams } = new URL(req.url)
+    const week = searchParams.get('week') === 'true'
+
+    if (week) {
+      // Only approved completions count toward rewards
+      const { data, error } = await supabaseAdmin
+        .from('completions')
+        .select('user_id, tasks ( time_value )')
+        .eq('status', 'approved')
+        .gte('completed_at', getWeekStart())
+        .lte('completed_at', getWeekEnd())
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+      const totals: Record<string, number> = {}
+      for (const row of data as any[]) {
+        const uid = row.user_id
+        totals[uid] = (totals[uid] || 0) + (row.tasks?.time_value || 0)
+      }
+      return NextResponse.json(totals)
+    }
+
+    // Recent completions with full info
+    const { data, error } = await supabaseAdmin
+      .from('completions')
+      .select('id, completed_at, status, actual_duration, users ( id, name, avatar_color ), tasks ( id, name, time_value )')
+      .order('completed_at', { ascending: false })
+      .limit(50)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await requireSession()
+    const { taskId, userId, actual_duration, force } = await req.json()
+
+    const targetUserId = session.role === 'admin' && userId ? userId : session.userId
+
+    // Check daily limit unless force=true (user confirmed repeat)
+    if (!force) {
+      const { data: task } = await supabaseAdmin
+        .from('tasks')
+        .select('daily_limit')
+        .eq('id', taskId)
+        .single()
+
+      if (task?.daily_limit != null) {
+        const dayStart = new Date()
+        dayStart.setHours(0, 0, 0, 0)
+        const dayEnd = new Date()
+        dayEnd.setHours(23, 59, 59, 999)
+
+        const { count } = await supabaseAdmin
+          .from('completions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', targetUserId)
+          .eq('task_id', taskId)
+          .neq('status', 'rejected')
+          .gte('completed_at', dayStart.toISOString())
+          .lte('completed_at', dayEnd.toISOString())
+
+        if ((count ?? 0) >= task.daily_limit) {
+          return NextResponse.json(
+            { error: 'daily_limit', count, limit: task.daily_limit },
+            { status: 409 }
+          )
+        }
+      }
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('completions')
+      .insert({
+        user_id: targetUserId,
+        task_id: taskId,
+        status: 'pending',
+        actual_duration: actual_duration ?? null,
+      })
+      .select('id, completed_at, status, tasks ( name, time_value )')
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await requireSession()
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+    const { data: completion } = await supabaseAdmin
+      .from('completions')
+      .select('user_id, status')
+      .eq('id', id)
+      .single()
+
+    if (!completion) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (session.role !== 'admin' && completion.user_id !== session.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    // Can't undo already-approved completions unless admin
+    if (completion.status === 'approved' && session.role !== 'admin') {
+      return NextResponse.json({ error: 'Already approved' }, { status: 403 })
+    }
+
+    const { error } = await supabaseAdmin.from('completions').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+}
