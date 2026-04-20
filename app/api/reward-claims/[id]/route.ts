@@ -8,20 +8,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     await requireAdmin()
     const { id } = await params
-    const { status, awarded_minutes } = await req.json()
+    const { status } = await req.json()
 
-    if (!['approved', 'rejected'].includes(status)) {
+    if (!['approved', 'declined'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    const updates: Record<string, unknown> = { status }
-    if (awarded_minutes != null) updates.awarded_minutes = awarded_minutes
-
     const { data, error } = await supabaseAdmin
-      .from('completions')
-      .update(updates)
+      .from('reward_claims')
+      .update({ status, resolved_at: new Date().toISOString() })
       .eq('id', id)
-      .select('id, status, awarded_minutes, tasks ( name, time_value ), users ( name )')
+      .select('id, status, users ( name ), rewards ( name )')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

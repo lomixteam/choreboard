@@ -12,6 +12,7 @@ export interface Task {
   time_value: number
   frequency_per_week: number
   daily_limit: number | null
+  category: string | null
   instructions: string | null
   active: boolean
   created_at?: string
@@ -23,7 +24,9 @@ export interface Completion {
   task_id: string
   completed_at: string
   status: 'pending' | 'approved' | 'rejected'
-  actual_duration: number | null  // seconds
+  actual_duration: number | null
+  awarded_minutes: number | null
+  note: string | null
   tasks?: Pick<Task, 'id' | 'name' | 'time_value'>
   users?: Pick<User, 'id' | 'name' | 'avatar_color'>
 }
@@ -33,6 +36,18 @@ export interface Reward {
   name: string
   threshold_minutes: number
   active: boolean
+}
+
+export interface RewardClaim {
+  id: string
+  user_id: string
+  reward_id: string
+  status: 'pending' | 'approved' | 'declined'
+  claimed_at: string
+  resolved_at: string | null
+  note: string | null
+  rewards?: Pick<Reward, 'id' | 'name' | 'threshold_minutes'>
+  users?: Pick<User, 'id' | 'name' | 'avatar_color'>
 }
 
 export interface SessionUser {
@@ -45,11 +60,4 @@ export interface WeeklyTotal {
   user: User
   minutes: number
   completions: number
-}
-
-export interface HistoryEntry {
-  week_start: string
-  user_id: string
-  total_minutes: number
-  task_count: number
 }
