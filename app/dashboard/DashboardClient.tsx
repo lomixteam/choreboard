@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock, CheckCircle, Trophy, BookOpen, LogOut, Settings, ChevronDown, ChevronUp, Undo2, Timer, BarChart2, Hourglass, User, Flame } from 'lucide-react'
+import { Clock, CheckCircle, Trophy, BookOpen, LogOut, Settings, ChevronDown, ChevronUp, Undo2, Timer, BarChart2, Hourglass, User as UserIcon, Flame } from 'lucide-react'
 import { formatMinutes } from '@/lib/utils'
 import type { Task, User, Reward, SessionUser } from '@/lib/types'
 
@@ -196,7 +196,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
             </div>
           )}
           <button onClick={() => router.push('/history')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><BarChart2 size={18} /></button>
-          <button onClick={() => router.push('/profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><User size={18} /></button>
+          <button onClick={() => router.push('/profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><UserIcon size={18} /></button>
           {session.role === 'admin' && (
             <button onClick={() => router.push('/admin')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><Settings size={18} /></button>
           )}
@@ -256,7 +256,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         {/* Tasks grouped by category */}
         {Object.entries(grouped).map(([category, catTasks]) => (
           <div key={category} style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--muted)', margin: '0 0 0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.8rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--muted)', margin: '0 0 0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {category}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
