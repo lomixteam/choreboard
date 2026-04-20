@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import NavBar from '@/components/NavBar'
 import { formatMinutes } from '@/lib/utils'
 import type { SessionUser } from '@/lib/types'
 
@@ -91,12 +91,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--paper)', fontFamily: 'var(--font-body)', paddingBottom: '3rem' }}>
-      <header style={{ background: 'var(--ink)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1 style={{ fontFamily: 'var(--font-display)', color: 'var(--paper)', fontSize: '1.3rem', margin: 0 }}>History</h1>
-      </header>
+      <NavBar session={session} />
 
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '1.25rem' }}>
 

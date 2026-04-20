@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Pencil, X, Check, ArrowLeft, ThumbsUp, ThumbsDown, Clock, Trophy } from 'lucide-react'
-import type { Task, User, Reward } from '@/lib/types'
+import { Plus, Trash2, Pencil, X, Check, ThumbsUp, ThumbsDown, Clock, Trophy } from 'lucide-react'
+import NavBar from '@/components/NavBar'
+import type { Task, User, Reward, SessionUser } from '@/lib/types'
 import { formatMinutes } from '@/lib/utils'
 
 const COLORS = ['#6b8f71','#e85d26','#f2a93b','#4a7fb5','#9b6bb5','#b56b6b','#6bb5b5','#1a1a2e']
@@ -28,6 +29,7 @@ interface PendingClaim {
 }
 
 interface Props {
+  session: SessionUser
   tasks: Task[]
   users: User[]
   rewards: Reward[]
@@ -55,7 +57,7 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(h / 24)}d ago`
 }
 
-export default function AdminClient({ tasks: initialTasks, users: initialUsers, rewards: initialRewards, pendingCompletions: initialPending, pendingClaims: initialClaims }: Props) {
+export default function AdminClient({ session, tasks: initialTasks, users: initialUsers, rewards: initialRewards, pendingCompletions: initialPending, pendingClaims: initialClaims }: Props) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('approvals')
 
@@ -278,13 +280,12 @@ export default function AdminClient({ tasks: initialTasks, users: initialUsers, 
         </div>
       )}
 
-      <header style={{ background: 'var(--ink)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}><ArrowLeft size={20} /></button>
-        <h1 style={{ fontFamily: 'var(--font-display)', color: 'var(--paper)', fontSize: '1.3rem', margin: 0, flex: 1 }}>Admin</h1>
+      <NavBar session={session} />
+      <div style={{ background: 'var(--ink)', padding: '0.5rem 1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
         <button onClick={() => setQuickLog(true)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '0.5rem', padding: '0.4rem 0.75rem', color: 'white', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', fontWeight: 600 }}>
           + Quick log
         </button>
-      </header>
+      </div>
 
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '1.25rem' }}>
         {/* Tabs */}

@@ -29,6 +29,7 @@ export default async function AdminPage() {
 
   return (
     <AdminClient
+      session={session}
       tasks={(tasksRes.data || []) as any[]}
       users={(usersRes.data || []) as any[]}
       rewards={(rewardsRes.data || []) as any[]}

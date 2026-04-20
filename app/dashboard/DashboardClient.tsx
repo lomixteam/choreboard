@@ -2,9 +2,10 @@
 
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock, CheckCircle, Trophy, BookOpen, LogOut, Settings, ChevronDown, ChevronUp, Undo2, Timer, BarChart2, Hourglass, User as UserIcon, Flame } from 'lucide-react'
+import { Clock, CheckCircle, Trophy, BookOpen, ChevronDown, ChevronUp, Undo2, Timer, Hourglass, Flame } from 'lucide-react'
 import { formatMinutes } from '@/lib/utils'
 import type { Task, User, Reward, SessionUser } from '@/lib/types'
+import NavBar from '@/components/NavBar'
 
 interface Props {
   session: SessionUser
@@ -146,11 +147,6 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
     }
   }
 
-  async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
-  }
-
   const taskSec = (id: string) => timerSeconds[id] || 0
 
   return (
@@ -184,25 +180,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         </div>
       )}
 
-      {/* Header */}
-      <header style={{ background: 'var(--ink)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', color: 'var(--paper)', fontSize: '1.4rem', margin: 0, letterSpacing: '-0.02em' }}>ChoreBoard</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ color: 'var(--gold)', fontWeight: 600, fontSize: '0.9rem' }}>{session.name}</span>
-          {myStreak >= 2 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(232,93,38,0.2)', borderRadius: '1rem', padding: '0.2rem 0.5rem' }}>
-              <Flame size={14} color="var(--accent)" />
-              <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700 }}>{myStreak}</span>
-            </div>
-          )}
-          <button onClick={() => router.push('/history')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><BarChart2 size={18} /></button>
-          <button onClick={() => router.push('/profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><UserIcon size={18} /></button>
-          {session.role === 'admin' && (
-            <button onClick={() => router.push('/admin')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><Settings size={18} /></button>
-          )}
-          <button onClick={logout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '0.25rem' }}><LogOut size={18} /></button>
-        </div>
-      </header>
+      <NavBar session={session} streak={myStreak} />
 
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '1.25rem' }}>
 

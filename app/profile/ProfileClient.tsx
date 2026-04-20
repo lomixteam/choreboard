@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import NavBar from '@/components/NavBar'
 import type { SessionUser } from '@/lib/types'
 
 interface Props { session: SessionUser }
@@ -50,12 +50,7 @@ export default function ProfileClient({ session }: Props) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--paper)', fontFamily: 'var(--font-body)' }}>
-      <header style={{ background: 'var(--ink)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1 style={{ fontFamily: 'var(--font-display)', color: 'var(--paper)', fontSize: '1.3rem', margin: 0 }}>My Profile</h1>
-      </header>
+      <NavBar session={session} />
 
       <div style={{ maxWidth: 400, margin: '0 auto', padding: '1.5rem' }}>
         <div style={{ background: 'white', borderRadius: '1.25rem', padding: '1.5rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
