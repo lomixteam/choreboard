@@ -22,13 +22,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     await requireAdmin()
-    const { name, threshold_minutes } = await req.json()
+    const { name, threshold_minutes, unlimited } = await req.json()
     if (!name || !threshold_minutes) {
       return NextResponse.json({ error: 'Name and threshold required' }, { status: 400 })
     }
     const { data, error } = await supabaseAdmin
       .from('rewards')
-      .insert({ name, threshold_minutes })
+      .insert({ name, threshold_minutes, unlimited: unlimited || false })
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

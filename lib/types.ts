@@ -35,6 +35,7 @@ export interface Reward {
   id: string
   name: string
   threshold_minutes: number
+  unlimited: boolean
   active: boolean
 }
 
@@ -60,4 +61,15 @@ export interface WeeklyTotal {
   user: User
   minutes: number
   completions: number
+}
+
+export interface SpendSession {
+  id: string
+  user_id: string
+  reward_id: string | null
+  started_at: string
+  stopped_at: string | null
+  minutes_used: number | null
+  week_start: string
+  rewards?: Pick<Reward, 'id' | 'name'>
 }

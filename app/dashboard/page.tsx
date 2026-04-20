@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   since60.setDate(since60.getDate() - 60)
   since60.setHours(0, 0, 0, 0)
 
-  const [tasksRes, usersRes, rewardsRes, completionsRes, streakRes, claimsRes] = await Promise.all([
+  const [tasksRes, usersRes, rewardsRes, completionsRes, streakRes, claimsRes, spendRes] = await Promise.all([
     supabaseAdmin.from('tasks').select('*').eq('active', true).order('category').order('name'),
     supabaseAdmin.from('users').select('id, name, avatar_color, role, created_at').order('name'),
     supabaseAdmin.from('rewards').select('*').eq('active', true).order('threshold_minutes'),
@@ -34,6 +34,11 @@ export default async function DashboardPage() {
       .select('id, status, reward_id, user_id')
       .eq('user_id', session.userId)
       .eq('status', 'pending'),
+    supabaseAdmin
+      .from('spend_sessions')
+      .select('user_id, minutes_used')
+      .eq('week_start', getWeekStart().slice(0, 10))
+      .not('minutes_used', 'is', null),
   ])
 
   // Weekly totals
@@ -42,6 +47,12 @@ export default async function DashboardPage() {
     const uid = row.user_id
     const mins = row.awarded_minutes ?? row.tasks?.time_value ?? 0
     weeklyTotals[uid] = (weeklyTotals[uid] || 0) + mins
+  }
+
+  // Subtract spent minutes
+  for (const row of (spendRes.data || []) as any[]) {
+    const uid = row.user_id
+    weeklyTotals[uid] = Math.max(0, (weeklyTotals[uid] || 0) - (row.minutes_used || 0))
   }
 
   // Streaks
@@ -65,6 +76,9 @@ export default async function DashboardPage() {
     }
     streaks[userId] = streak
   }
+
+  // Active spend session for current user
+  const activeSpendSession = null // fetched client-side for real-time countdown
 
   // Pending claim reward IDs for current user
   const pendingClaimRewardIds = (claimsRes.data || []).map((c: any) => c.reward_id)

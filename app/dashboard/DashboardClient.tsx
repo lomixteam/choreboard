@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useTransition, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Clock, CheckCircle, Trophy, BookOpen, ChevronDown, ChevronUp, Undo2, Timer, Hourglass, Flame } from 'lucide-react'
 import { formatMinutes } from '@/lib/utils'
 import type { Task, User, Reward, SessionUser } from '@/lib/types'
 import NavBar from '@/components/NavBar'
+import SpendTimer from '@/components/SpendTimer'
 
 interface Props {
   session: SessionUser
@@ -330,6 +332,9 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
             </div>
           </div>
         ))}
+
+        {/* Spend timer */}
+        <SpendTimer availableMinutes={myMinutes} rewards={rewards.filter(r => r.unlimited || myMinutes >= r.threshold_minutes)} userId={session.userId} />
 
         {/* Rewards */}
         {rewards.length > 0 && (

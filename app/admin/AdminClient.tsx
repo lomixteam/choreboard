@@ -81,7 +81,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
   const [editingTask, setEditingTask] = useState<string | null>(null)
   const [userForm, setUserForm] = useState({ name: '', pin: '', role: 'member', avatar_color: COLORS[0] })
   const [editingUser, setEditingUser] = useState<string | null>(null)
-  const [rewardForm, setRewardForm] = useState({ name: '', threshold_minutes: '' })
+  const [rewardForm, setRewardForm] = useState({ name: '', threshold_minutes: '', unlimited: false })
   const [editingReward, setEditingReward] = useState<string | null>(null)
 
   const totalPending = pending.length + claims.length
@@ -212,7 +212,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
   // --- Rewards ---
   async function saveReward() {
     if (!rewardForm.name || !rewardForm.threshold_minutes) return
-    const body = { name: rewardForm.name, threshold_minutes: Number(rewardForm.threshold_minutes) }
+    const body = { name: rewardForm.name, threshold_minutes: Number(rewardForm.threshold_minutes), unlimited: rewardForm.unlimited }
     if (editingReward) {
       const res = await fetch(`/api/rewards/${editingReward}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       const updated = await res.json()
@@ -223,7 +223,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
       const created = await res.json()
       setRewards(prev => [...prev, created].sort((a, b) => a.threshold_minutes - b.threshold_minutes))
     }
-    setRewardForm({ name: '', threshold_minutes: '' })
+    setRewardForm({ name: '', threshold_minutes: '', unlimited: false })
   }
 
   async function deleteReward(id: string) {
@@ -502,7 +502,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
                 <input style={inputStyle} placeholder="Nepieciešamās minūtes" type="number" value={rewardForm.threshold_minutes} onChange={e => setRewardForm(f => ({ ...f, threshold_minutes: e.target.value }))} />
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button style={btnPrimary} onClick={saveReward}>{editingReward ? <><Check size={16} /> Save</> : <><Plus size={16} /> Add</>}</button>
-                  {editingReward && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingReward(null); setRewardForm({ name: '', threshold_minutes: '' }) }}><X size={16} /> Atcelt</button>}
+                  {editingReward && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingReward(null); setRewardForm({ name: '', threshold_minutes: '', unlimited: false }) }}><X size={16} /> Atcelt</button>}
                 </div>
               </div>
             </div>
@@ -511,9 +511,9 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
                 <div key={reward.id} style={{ background: reward.active ? 'white' : 'var(--cream)', borderRadius: '0.75rem', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{reward.name}</p>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)' }}>{reward.threshold_minutes} min</p>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)' }}>{reward.unlimited ? '∞ bezlimita' : `${reward.threshold_minutes} min`}</p>
                   </div>
-                  <button onClick={() => { setEditingReward(reward.id); setRewardForm({ name: reward.name, threshold_minutes: String(reward.threshold_minutes) }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}><Pencil size={16} /></button>
+                  <button onClick={() => { setEditingReward(reward.id); setRewardForm({ name: reward.name, threshold_minutes: String(reward.threshold_minutes), unlimited: reward.unlimited || false }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}><Pencil size={16} /></button>
                   <button onClick={() => deleteReward(reward.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}><Trash2 size={16} /></button>
                 </div>
               ))}
