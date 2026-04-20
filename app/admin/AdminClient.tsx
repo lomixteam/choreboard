@@ -37,7 +37,7 @@ interface Props {
   pendingClaims: PendingClaim[]
 }
 
-type Tab = 'approvals' | 'tasks' | 'users' | 'rewards'
+type Tab = 'apstiprinājumi' | 'uzdevumi' | 'lietotāji' | 'atlīdzības'
 
 // Award options for a completion
 type AwardOption = 'full' | 'half' | 'actual' | 'custom'
@@ -59,7 +59,7 @@ function timeAgo(dateStr: string) {
 
 export default function AdminClient({ session, tasks: initialTasks, users: initialUsers, rewards: initialRewards, pendingCompletions: initialPending, pendingClaims: initialClaims }: Props) {
   const router = useRouter()
-  const [tab, setTab] = useState<Tab>('approvals')
+  const [tab, setTab] = useState<Tab>('apstiprinājumi')
 
   const [tasks, setTasks] = useState(initialTasks)
   const [users, setUsers] = useState(initialUsers)
@@ -175,7 +175,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
   }
 
   async function deleteTask(id: string) {
-    if (!confirm('Archive this task?')) return
+    if (!confirm('Arhivēt šo uzdevumu?')) return
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
     setTasks(prev => prev.filter(t => t.id !== id))
   }
@@ -204,7 +204,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
   }
 
   async function deleteUser(id: string) {
-    if (!confirm('Delete this user?')) return
+    if (!confirm('Dzēst šo lietotāju?')) return
     await fetch(`/api/users/${id}`, { method: 'DELETE' })
     setUsers(prev => prev.filter(u => u.id !== id))
   }
@@ -227,7 +227,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
   }
 
   async function deleteReward(id: string) {
-    if (!confirm('Delete this reward?')) return
+    if (!confirm('Dzēst šo atlīdzību?')) return
     await fetch(`/api/rewards/${id}`, { method: 'DELETE' })
     setRewards(prev => prev.filter(r => r.id !== id))
   }
@@ -256,17 +256,17 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
       {quickLog && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1.5rem' }}>
           <div style={{ background: 'white', borderRadius: '1.5rem', padding: '2rem', maxWidth: 360, width: '100%' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem' }}>Log task for someone</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem' }}>Atzīmēt uzdevumu kādam</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <select style={inputStyle} value={qlUser} onChange={e => setQlUser(e.target.value)}>
-                <option value="">Select person...</option>
+                <option value="">Izvēlies personu...</option>
                 {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
               <select style={inputStyle} value={qlTask} onChange={e => setQlTask(e.target.value)}>
-                <option value="">Select task...</option>
+                <option value="">Izvēlies uzdevumu...</option>
                 {tasks.filter(t => t.active).map(t => <option key={t.id} value={t.id}>{t.name} ({t.time_value} min)</option>)}
               </select>
-              <input style={inputStyle} placeholder="Note (optional)" value={qlNote} onChange={e => setQlNote(e.target.value)} />
+              <input style={inputStyle} placeholder="Piezīme (pēc izvēles)" value={qlNote} onChange={e => setQlNote(e.target.value)} />
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button style={{ ...btnPrimary, flex: 1, justifyContent: 'center' }} onClick={submitQuickLog} disabled={!qlUser || !qlTask}>
                   <Check size={16} /> Log & approve
@@ -290,7 +290,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '1.25rem' }}>
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem', background: 'var(--cream)', borderRadius: '0.75rem', padding: '0.3rem' }}>
-          {(['approvals', 'tasks', 'users', 'rewards'] as Tab[]).map(t => (
+          {(['apstiprinājumi', 'uzdevumi', 'lietotāji', 'atlīdzības'] as Tab[]).map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               flex: 1, padding: '0.55rem 0.25rem', border: 'none', borderRadius: '0.5rem', cursor: 'pointer',
               background: tab === t ? 'white' : 'transparent',
@@ -300,7 +300,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
               textTransform: 'capitalize', position: 'relative',
             }}>
               {t}
-              {t === 'approvals' && totalPending > 0 && (
+              {t === 'apstiprinājumi' && totalPending > 0 && (
                 <span style={{ position: 'absolute', top: 2, right: 2, background: 'var(--accent)', color: 'white', borderRadius: '50%', width: 16, height: 16, fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
                   {totalPending}
                 </span>
@@ -310,12 +310,12 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
         </div>
 
         {/* ---- APPROVALS ---- */}
-        {tab === 'approvals' && (
+        {tab === 'apstiprinājumi' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {totalPending === 0 && (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--muted)' }}>
                 <p style={{ fontSize: '2rem', margin: '0 0 0.5rem' }}>✓</p>
-                <p style={{ margin: 0 }}>Nothing to approve</p>
+                <p style={{ margin: 0 }}>Nav ko apstiprināt</p>
               </div>
             )}
 
@@ -376,7 +376,7 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
 
                       {/* Award options */}
                       <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', marginRight: '0.2rem' }}>Award:</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', marginRight: '0.2rem' }}>Piešķirt:</span>
                         <button style={awardBtn(opt === 'full')} onClick={() => setAwardOption(p => ({ ...p, [c.id]: 'full' }))}>
                           Full ({preset} min)
                         </button>
@@ -414,22 +414,22 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
         )}
 
         {/* ---- TASKS ---- */}
-        {tab === 'tasks' && (
+        {tab === 'uzdevumi' && (
           <div>
             <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingTask ? 'Edit Task' : 'Add Task'}</h3>
+              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingTask ? 'Rediģēt uzdevumu' : 'Pievienot uzdevumu'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <input style={inputStyle} placeholder="Task name" value={taskForm.name} onChange={e => setTaskForm(f => ({ ...f, name: e.target.value }))} />
-                <input style={inputStyle} placeholder="Category (e.g. Kitchen, Music)" value={taskForm.category} onChange={e => setTaskForm(f => ({ ...f, category: e.target.value }))} />
+                <input style={inputStyle} placeholder="Uzdevuma nosaukums" value={taskForm.name} onChange={e => setTaskForm(f => ({ ...f, name: e.target.value }))} />
+                <input style={inputStyle} placeholder="Kategorija (piem. Virtuve, Mūzika)" value={taskForm.category} onChange={e => setTaskForm(f => ({ ...f, category: e.target.value }))} />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.6rem' }}>
                   <input style={inputStyle} placeholder="Minutes" type="number" value={taskForm.time_value} onChange={e => setTaskForm(f => ({ ...f, time_value: e.target.value }))} />
-                  <input style={inputStyle} placeholder="×/week" type="number" value={taskForm.frequency_per_week} onChange={e => setTaskForm(f => ({ ...f, frequency_per_week: e.target.value }))} />
-                  <input style={inputStyle} placeholder="Max/day" type="number" value={taskForm.daily_limit} onChange={e => setTaskForm(f => ({ ...f, daily_limit: e.target.value }))} />
+                  <input style={inputStyle} placeholder="×/ned" type="number" value={taskForm.frequency_per_week} onChange={e => setTaskForm(f => ({ ...f, frequency_per_week: e.target.value }))} />
+                  <input style={inputStyle} placeholder="Maks/dienā" type="number" value={taskForm.daily_limit} onChange={e => setTaskForm(f => ({ ...f, daily_limit: e.target.value }))} />
                 </div>
-                <textarea style={{ ...inputStyle, minHeight: 72, resize: 'vertical' }} placeholder="Instructions (optional)" value={taskForm.instructions} onChange={e => setTaskForm(f => ({ ...f, instructions: e.target.value }))} />
+                <textarea style={{ ...inputStyle, minHeight: 72, resize: 'vertical' }} placeholder="Instrukcijas (pēc izvēles)" value={taskForm.instructions} onChange={e => setTaskForm(f => ({ ...f, instructions: e.target.value }))} />
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button style={btnPrimary} onClick={saveTask}>{editingTask ? <><Check size={16} /> Save</> : <><Plus size={16} /> Add</>}</button>
-                  {editingTask && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingTask(null); setTaskForm({ name: '', time_value: '', frequency_per_week: '1', daily_limit: '', category: '', instructions: '' }) }}><X size={16} /> Cancel</button>}
+                  {editingTask && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingTask(null); setTaskForm({ name: '', time_value: '', frequency_per_week: '1', daily_limit: '', category: '', instructions: '' }) }}><X size={16} /> Atcelt</button>}
                 </div>
               </div>
             </div>
@@ -453,26 +453,26 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
         )}
 
         {/* ---- USERS ---- */}
-        {tab === 'users' && (
+        {tab === 'lietotāji' && (
           <div>
             <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingUser ? 'Edit User' : 'Add User'}</h3>
+              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingUser ? 'Rediģēt lietotāju' : 'Pievienot lietotāju'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 <input style={inputStyle} placeholder="Name" value={userForm.name} onChange={e => setUserForm(f => ({ ...f, name: e.target.value }))} />
-                <input style={inputStyle} placeholder={editingUser ? 'New PIN (leave blank to keep)' : 'PIN (4+ digits)'} type="password" value={userForm.pin} onChange={e => setUserForm(f => ({ ...f, pin: e.target.value }))} />
+                <input style={inputStyle} placeholder={editingUser ? 'Jauns PIN (atstāj tukšu, lai nemainītu)' : 'PIN (4+ cipari)'} type="password" value={userForm.pin} onChange={e => setUserForm(f => ({ ...f, pin: e.target.value }))} />
                 <select style={inputStyle} value={userForm.role} onChange={e => setUserForm(f => ({ ...f, role: e.target.value }))}>
-                  <option value="member">Member</option>
-                  <option value="admin">Admin</option>
+                  <option value="member">Dalībnieks</option>
+                  <option value="admin">Administrators</option>
                 </select>
                 <div>
-                  <p style={{ margin: '0 0 0.4rem', fontSize: '0.8rem', color: 'var(--muted)' }}>Avatar color</p>
+                  <p style={{ margin: '0 0 0.4rem', fontSize: '0.8rem', color: 'var(--muted)' }}>Avatara krāsa</p>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {COLORS.map(c => <button key={c} onClick={() => setUserForm(f => ({ ...f, avatar_color: c }))} style={{ width: 32, height: 32, borderRadius: '50%', background: c, border: 'none', cursor: 'pointer', outline: userForm.avatar_color === c ? '3px solid var(--ink)' : 'none', outlineOffset: 2 }} />)}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button style={btnPrimary} onClick={saveUser}>{editingUser ? <><Check size={16} /> Save</> : <><Plus size={16} /> Add</>}</button>
-                  {editingUser && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingUser(null); setUserForm({ name: '', pin: '', role: 'member', avatar_color: COLORS[0] }) }}><X size={16} /> Cancel</button>}
+                  {editingUser && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingUser(null); setUserForm({ name: '', pin: '', role: 'member', avatar_color: COLORS[0] }) }}><X size={16} /> Atcelt</button>}
                 </div>
               </div>
             </div>
@@ -493,16 +493,16 @@ export default function AdminClient({ session, tasks: initialTasks, users: initi
         )}
 
         {/* ---- REWARDS ---- */}
-        {tab === 'rewards' && (
+        {tab === 'atlīdzības' && (
           <div>
             <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingReward ? 'Edit Reward' : 'Add Reward'}</h3>
+              <h3 style={{ margin: '0 0 1rem', fontFamily: 'var(--font-display)', fontSize: '1rem' }}>{editingReward ? 'Rediģēt atlīdzību' : 'Pievienot atlīdzību'}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <input style={inputStyle} placeholder="Reward name" value={rewardForm.name} onChange={e => setRewardForm(f => ({ ...f, name: e.target.value }))} />
-                <input style={inputStyle} placeholder="Minutes required" type="number" value={rewardForm.threshold_minutes} onChange={e => setRewardForm(f => ({ ...f, threshold_minutes: e.target.value }))} />
+                <input style={inputStyle} placeholder="Atlīdzības nosaukums" value={rewardForm.name} onChange={e => setRewardForm(f => ({ ...f, name: e.target.value }))} />
+                <input style={inputStyle} placeholder="Nepieciešamās minūtes" type="number" value={rewardForm.threshold_minutes} onChange={e => setRewardForm(f => ({ ...f, threshold_minutes: e.target.value }))} />
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button style={btnPrimary} onClick={saveReward}>{editingReward ? <><Check size={16} /> Save</> : <><Plus size={16} /> Add</>}</button>
-                  {editingReward && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingReward(null); setRewardForm({ name: '', threshold_minutes: '' }) }}><X size={16} /> Cancel</button>}
+                  {editingReward && <button style={{ ...btnPrimary, background: 'var(--cream)', color: 'var(--ink)' }} onClick={() => { setEditingReward(null); setRewardForm({ name: '', threshold_minutes: '' }) }}><X size={16} /> Atcelt</button>}
                 </div>
               </div>
             </div>

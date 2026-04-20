@@ -43,12 +43,12 @@ function formatWeekLabel(weekKey: string) {
 
 export default function HistoryClient({ completions, users, session }: Props) {
   const router = useRouter()
-  const [range, setRange] = useState<'week' | 'month'>('month')
+  const [range, setRange] = useState<'nedēļa' | 'mēnesis'>('mēnesis')
   const [selectedUser, setSelectedUser] = useState<string>('all')
 
   const cutoff = useMemo(() => {
     const d = new Date()
-    d.setDate(d.getDate() - (range === 'week' ? 7 : 28))
+    d.setDate(d.getDate() - (range === 'nedēļa' ? 7 : 28))
     d.setHours(0, 0, 0, 0)
     return d
   }, [range])
@@ -98,7 +98,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {/* Filters */}
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', background: 'var(--cream)', borderRadius: '0.6rem', padding: '0.25rem' }}>
-            {(['week', 'month'] as const).map(r => (
+            {(['nedēļa', 'mēnesis'] as const).map(r => (
               <button key={r} onClick={() => setRange(r)} style={{
                 padding: '0.4rem 0.9rem', border: 'none', borderRadius: '0.4rem',
                 background: range === r ? 'white' : 'transparent',
@@ -115,7 +115,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
               background: selectedUser === 'all' ? 'white' : 'transparent',
               fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '0.85rem',
               color: selectedUser === 'all' ? 'var(--ink)' : 'var(--muted)', cursor: 'pointer',
-            }}>All</button>
+            }}>Visi</button>
             {users.map(u => (
               <button key={u.id} onClick={() => setSelectedUser(u.id)} style={{
                 padding: '0.4rem 0.75rem', border: 'none', borderRadius: '0.4rem',
@@ -130,13 +130,13 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {/* Summary */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
           <div style={{ background: 'var(--ink)', borderRadius: '1rem', padding: '1.25rem', color: 'white' }}>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total time</p>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Kopējais laiks</p>
             <p style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--gold)' }}>
               {formatMinutes(totalMinutes)}
             </p>
           </div>
           <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Tasks done</p>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Izpildīti uzdevumi</p>
             <p style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--ink)' }}>
               {filtered.length}
             </p>
@@ -146,7 +146,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {/* Weekly bar chart */}
         {weeklyData.length > 0 && (
           <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem', fontSize: '1rem' }}>Weekly totals</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem', fontSize: '1rem' }}>Nedēļas kopsavilkums</h3>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', minHeight: 120 }}>
               {weeklyData.map(([weekKey, userMinutes]) => {
                 const weekTotal = Object.values(userMinutes).reduce((s, v) => s + v, 0)
@@ -191,7 +191,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {/* Task breakdown */}
         {taskBreakdown.length > 0 && (
           <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1rem', fontSize: '1rem' }}>By task</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1rem', fontSize: '1rem' }}>Pa uzdevumiem</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {taskBreakdown.map(([name, mins]) => (
                 <div key={name}>
@@ -215,7 +215,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--muted)' }}>
             <p style={{ fontSize: '2rem', margin: '0 0 0.5rem' }}>📊</p>
-            <p style={{ margin: 0 }}>No approved completions in this period yet.</p>
+            <p style={{ margin: 0 }}>Šajā periodā vēl nav apstiprinātu izpilžu.</p>
           </div>
         )}
       </div>

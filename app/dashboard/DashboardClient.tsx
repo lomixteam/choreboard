@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import { Clock, CheckCircle, Trophy, BookOpen, ChevronDown, ChevronUp, Undo2, Timer, Hourglass, Flame } from 'lucide-react'
 import { formatMinutes } from '@/lib/utils'
 import type { Task, User, Reward, SessionUser } from '@/lib/types'
@@ -123,11 +122,11 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
     const res = await fetch(`/api/completions?id=${completionId}`, { method: 'DELETE' })
     if (res.ok) {
       setJustDone(prev => { const n = { ...prev }; delete n[taskId]; return n })
-      showToast('Undone')
+      showToast('Atcelts')
       startTransition(() => router.refresh())
     } else {
       const d = await res.json()
-      showToast(d.error || 'Cannot undo', 'warn')
+      showToast(d.error || 'Nevar atcelt', 'warn')
     }
   }
 
@@ -143,7 +142,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
       showToast('🎉 Reward claimed — waiting for approval!')
     } else {
       const d = await res.json()
-      showToast(d.error === 'already_pending' ? 'Already claimed, waiting for approval' : 'Could not claim', 'warn')
+      showToast(d.error === 'already_pending' ? 'Jau pieprasīts, gaida apstiprinājumu' : 'Nevarēja pieprasīt', 'warn')
     }
   }
 
@@ -168,13 +167,13 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1.5rem' }}>
           <div style={{ background: 'white', borderRadius: '1.5rem', padding: '2rem', maxWidth: 320, width: '100%', textAlign: 'center' }}>
             <p style={{ fontSize: '2rem', margin: '0 0 0.5rem' }}>⚠️</p>
-            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 0.5rem' }}>Already done today</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 0.5rem' }}>Šodien jau izpildīts</h3>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: '0 0 1.5rem' }}>
               You've already logged <strong>{confirmTask.name}</strong> today. Log it again anyway?
             </p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => setConfirmTask(null)} style={{ flex: 1, padding: '0.75rem', background: 'var(--cream)', border: 'none', borderRadius: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>Cancel</button>
-              <button onClick={confirmRepeat} style={{ flex: 1, padding: '0.75rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>Log again</button>
+              <button onClick={() => setConfirmTask(null)} style={{ flex: 1, padding: '0.75rem', background: 'var(--cream)', border: 'none', borderRadius: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>Atcelt</button>
+              <button onClick={confirmRepeat} style={{ flex: 1, padding: '0.75rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>Atzīmēt vēlreiz</button>
             </div>
           </div>
         </div>
@@ -188,14 +187,14 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         <div style={{ background: 'var(--ink)', borderRadius: '1.5rem', padding: '1.5rem', marginBottom: '1.5rem', color: 'white' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <div>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>This week (approved)</p>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Šī nedēļa (apstiprināts)</p>
               <p style={{ margin: '0.25rem 0 0', fontSize: '2.5rem', fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>
                 {formatMinutes(myMinutes)}
               </p>
               {myStreak >= 2 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.4rem' }}>
                   <Flame size={14} color="var(--accent)" />
-                  <span style={{ fontSize: '0.82rem', color: 'var(--accent)', fontWeight: 600 }}>{myStreak} day streak!</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--accent)', fontWeight: 600 }}>{myStreak} dienu sērija!</span>
                 </div>
               )}
             </div>
@@ -264,7 +263,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <p style={{ margin: 0, fontWeight: 600, color: done ? 'white' : 'var(--ink)', fontSize: '0.95rem' }}>{task.name}</p>
-                          {done && <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.25)', color: 'white', borderRadius: '0.5rem', padding: '0.1rem 0.4rem' }}>pending</span>}
+                          {done && <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.25)', color: 'white', borderRadius: '0.5rem', padding: '0.1rem 0.4rem' }}>gaida</span>}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.15rem', flexWrap: 'wrap' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -299,7 +298,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
                     {!done && expanded && (
                       <div style={{ padding: '0 1rem 0.75rem' }}>
                         <input
-                          placeholder="Add a note (optional)..."
+                          placeholder="Piezīme (pēc izvēles)..."
                           value={noteInputs[task.id] || ''}
                           onChange={e => setNoteInputs(prev => ({ ...prev, [task.id]: e.target.value }))}
                           style={{ width: '100%', padding: '0.5rem 0.75rem', border: '2px solid var(--cream)', borderRadius: '0.5rem', fontFamily: 'var(--font-body)', fontSize: '0.85rem', background: 'var(--paper)', color: 'var(--ink)', outline: 'none', boxSizing: 'border-box' }}
@@ -315,7 +314,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
                             ✓ Done — {formatDuration(elapsed)}
                           </button>
                         )}
-                        <button onClick={() => resetTimer(task.id)} style={{ padding: '0.5rem 0.75rem', background: 'var(--cream)', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--muted)' }}>Reset</button>
+                        <button onClick={() => resetTimer(task.id)} style={{ padding: '0.5rem 0.75rem', background: 'var(--cream)', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--muted)' }}>Atiestatīt</button>
                       </div>
                     )}
 
@@ -335,7 +334,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
         {/* Rewards */}
         {rewards.length > 0 && (
           <div style={{ marginTop: '1rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--ink)', margin: '0 0 0.75rem' }}>Rewards</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--ink)', margin: '0 0 0.75rem' }}>Atlīdzības</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {rewards.map(reward => {
                 const unlocked = myMinutes >= reward.threshold_minutes
@@ -350,7 +349,7 @@ export default function DashboardClient({ session, tasks, users, rewards, weekly
                         Claim
                       </button>
                     )}
-                    {claimed && <span style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 600 }}>Pending ⏳</span>}
+                    {claimed && <span style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 600 }}>Gaida ⏳</span>}
                     {unlocked && !claimed && <CheckCircle size={16} color="var(--gold)" />}
                   </div>
                 )

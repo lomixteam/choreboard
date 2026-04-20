@@ -54,18 +54,18 @@ export default function NavBar({ session, streak = 0 }: Props) {
           </div>
         )}
 
-        <button onClick={() => router.push('/history')} style={navBtn(path === '/history')} title="History">
+        <button onClick={() => router.push('/history')} style={navBtn(path === '/history')} title="Vēsture">
           <BarChart2 size={18} />
         </button>
-        <button onClick={() => router.push('/profile')} style={navBtn(path === '/profile')} title="Profile & PIN">
+        <button onClick={() => router.push('/profile')} style={navBtn(path === '/profile')} title="Profils & PIN">
           <UserIcon size={18} />
         </button>
         {session.role === 'admin' && (
-          <button onClick={() => router.push('/admin')} style={navBtn(path === '/admin')} title="Admin">
+          <button onClick={() => router.push('/admin')} style={navBtn(path === '/admin')} title="Administrators">
             <Settings size={18} />
           </button>
         )}
-        <button onClick={logout} style={navBtn(false)} title="Log out">
+        <button onClick={logout} style={navBtn(false)} title="Iziet">
           <LogOut size={18} />
         </button>
       </div>

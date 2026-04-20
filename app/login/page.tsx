@@ -60,11 +60,11 @@ export default function LoginPage() {
         router.refresh()
       } else {
         const data = await res.json()
-        setError(data.error || 'Wrong PIN')
+        setError(data.error || 'Nepareizs PIN')
         setPin('')
       }
     } catch (e) {
-      setError('Network error')
+      setError('Tīkla kļūda')
     } finally {
       setLoading(false)
     }
@@ -147,13 +147,13 @@ export default function LoginPage() {
           letterSpacing: '-0.02em',
         }}>ChoreBoard</h1>
         <p style={{ color: 'var(--muted)', marginTop: '0.5rem' }}>
-          {selected ? `Hi ${selected.name} — enter your PIN` : 'Who are you?'}
+          {selected ? `Hi ${selected.name} — enter your PIN` : 'Kas tu esi?'}
         </p>
       </div>
 
       {/* Loading / error state for user fetch */}
       {!fetchDone && !selected && (
-        <p style={{ color: 'var(--muted)' }}>Loading...</p>
+        <p style={{ color: 'var(--muted)' }}>Ielādē...</p>
       )}
 
       {fetchError && (
@@ -271,7 +271,7 @@ export default function LoginPage() {
             disabled={pin.length < 4 || loading}
             style={s.submitBtn}
           >
-            {loading ? 'Checking...' : 'Log in →'}
+            {loading ? 'Pārbauda...' : 'Ieiet →'}
           </button>
 
           <button
