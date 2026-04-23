@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "next": "15.5.14",
+    "next-pwa": "^5.6.0",
     "react": "^19",
     "react-dom": "^19",
     "@supabase/supabase-js": "^2.43.4",
