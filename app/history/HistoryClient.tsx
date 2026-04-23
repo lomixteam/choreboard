@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import NavBar from '@/components/NavBar'
 import { formatMinutes } from '@/lib/utils'
 import type { SessionUser } from '@/lib/types'
@@ -26,32 +25,38 @@ interface Props {
   session: SessionUser
 }
 
-function getWeekKey(dateStr: string) {
-  const d = new Date(dateStr)
-  const day = d.getDay()
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(d)
-  monday.setDate(diff)
-  monday.setHours(0, 0, 0, 0)
-  return monday.toISOString().slice(0, 10)
+function getDayKey(dateStr: string) {
+  return new Date(dateStr).toISOString().slice(0, 10) // YYYY-MM-DD
 }
 
-function formatWeekLabel(weekKey: string) {
-  const d = new Date(weekKey)
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+function formatDayLabel(dayKey: string) {
+  const d = new Date(dayKey + 'T12:00:00') // noon to avoid timezone shifts
+  return d.toLocaleDateString('lv-LV', { day: 'numeric', month: 'short' })
+}
+
+// Fill in all days in range so empty days still show
+function getDayRange(days: number): string[] {
+  const result: string[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    result.push(d.toISOString().slice(0, 10))
+  }
+  return result
 }
 
 export default function HistoryClient({ completions, users, session }: Props) {
-  const router = useRouter()
   const [range, setRange] = useState<'nedēļa' | 'mēnesis'>('mēnesis')
   const [selectedUser, setSelectedUser] = useState<string>('all')
 
+  const rangeDays = range === 'nedēļa' ? 7 : 28
+
   const cutoff = useMemo(() => {
     const d = new Date()
-    d.setDate(d.getDate() - (range === 'nedēļa' ? 7 : 28))
+    d.setDate(d.getDate() - rangeDays)
     d.setHours(0, 0, 0, 0)
     return d
-  }, [range])
+  }, [rangeDays])
 
   const filtered = useMemo(() =>
     completions.filter(c => {
@@ -61,33 +66,37 @@ export default function HistoryClient({ completions, users, session }: Props) {
       return true
     }), [completions, cutoff, selectedUser])
 
-  // Weekly totals per user per week
-  const weeklyData = useMemo(() => {
-    const map: Record<string, Record<string, number>> = {} // weekKey → userId → minutes
+  // Daily totals per user
+  const dailyData = useMemo(() => {
+    const map: Record<string, Record<string, number>> = {} // dayKey → userId → minutes
     for (const c of filtered) {
-      const wk = getWeekKey(c.completed_at)
-      if (!map[wk]) map[wk] = {}
+      const dk = getDayKey(c.completed_at)
+      if (!map[dk]) map[dk] = {}
       const uid = c.user_id
-      map[wk][uid] = (map[wk][uid] || 0) + (c.tasks?.time_value || 0)
+      map[dk][uid] = (map[dk][uid] || 0) + (c.tasks?.time_value || 0)
     }
-    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b))
-  }, [filtered])
+    // Return all days in range, including empty ones
+    return getDayRange(rangeDays).map(dk => [dk, map[dk] || {}] as [string, Record<string, number>])
+  }, [filtered, rangeDays])
 
   // Task breakdown
   const taskBreakdown = useMemo(() => {
     const map: Record<string, number> = {}
     for (const c of filtered) {
-      const name = c.tasks?.name || 'Unknown'
+      const name = c.tasks?.name || 'Nezināms'
       map[name] = (map[name] || 0) + (c.tasks?.time_value || 0)
     }
     return Object.entries(map).sort(([, a], [, b]) => b - a)
   }, [filtered])
 
   const totalMinutes = filtered.reduce((s, c) => s + (c.tasks?.time_value || 0), 0)
-  const maxWeekMinutes = Math.max(1, ...weeklyData.map(([, u]) => Object.values(u).reduce((s, v) => s + v, 0)))
+  const maxDayMinutes = Math.max(1, ...dailyData.map(([, u]) => Object.values(u).reduce((s, v) => s + v, 0)))
   const maxTaskMinutes = taskBreakdown[0]?.[1] || 1
 
   const displayUsers = selectedUser === 'all' ? users : users.filter(u => u.id === selectedUser)
+
+  // Show fewer labels to avoid crowding — every 7 days for month, every day for week
+  const labelEvery = range === 'nedēļa' ? 1 : 7
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--paper)', fontFamily: 'var(--font-body)', paddingBottom: '3rem' }}>
@@ -143,50 +152,72 @@ export default function HistoryClient({ completions, users, session }: Props) {
           </div>
         </div>
 
-        {/* Weekly bar chart */}
-        {weeklyData.length > 0 && (
-          <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem', fontSize: '1rem' }}>Nedēļas kopsavilkums</h3>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', minHeight: 120 }}>
-              {weeklyData.map(([weekKey, userMinutes]) => {
-                const weekTotal = Object.values(userMinutes).reduce((s, v) => s + v, 0)
-                const barHeight = Math.max(4, (weekTotal / maxWeekMinutes) * 100)
-                return (
-                  <div key={weekKey} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                      {formatMinutes(weekTotal)}
-                    </span>
-                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2, borderRadius: '0.4rem', overflow: 'hidden' }}>
-                      {displayUsers.map(u => {
-                        const mins = userMinutes[u.id] || 0
-                        const h = Math.max(0, (mins / maxWeekMinutes) * 100)
-                        return h > 0 ? (
-                          <div key={u.id} title={`${u.name}: ${formatMinutes(mins)}`} style={{
-                            width: '100%', height: h,
-                            background: u.avatar_color,
-                            borderRadius: '0.25rem',
-                          }} />
-                        ) : null
-                      })}
-                    </div>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>{formatWeekLabel(weekKey)}</span>
+        {/* Daily bar chart */}
+        <div style={{ background: 'white', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', margin: '0 0 1.25rem', fontSize: '1rem' }}>
+            {range === 'nedēļa' ? 'Pa dienām (7 dienas)' : 'Pa dienām (28 dienas)'}
+          </h3>
+          <div style={{ display: 'flex', gap: range === 'mēnesis' ? '0.2rem' : '0.4rem', alignItems: 'flex-end', minHeight: 120 }}>
+            {dailyData.map(([dayKey, userMinutes], i) => {
+              const dayTotal = Object.values(userMinutes).reduce((s, v) => s + v, 0)
+              const barHeight = Math.max(2, (dayTotal / maxDayMinutes) * 100)
+              const showLabel = i % labelEvery === 0 || i === dailyData.length - 1
+              const isToday = dayKey === new Date().toISOString().slice(0, 10)
+
+              return (
+                <div key={dayKey} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem', minWidth: 0 }}>
+                  {/* Minute label — only show if non-zero */}
+                  <span style={{ fontSize: '0.6rem', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', visibility: dayTotal > 0 ? 'visible' : 'hidden' }}>
+                    {formatMinutes(dayTotal)}
+                  </span>
+                  {/* Bar */}
+                  <div style={{
+                    width: '100%',
+                    height: dayTotal > 0 ? barHeight : 4,
+                    display: 'flex', flexDirection: 'column', gap: 1,
+                    borderRadius: '0.25rem', overflow: 'hidden',
+                    background: dayTotal === 0 ? 'var(--cream)' : undefined,
+                    outline: isToday ? '2px solid var(--accent)' : 'none',
+                    outlineOffset: 1,
+                  }}>
+                    {dayTotal > 0 && displayUsers.map(u => {
+                      const mins = userMinutes[u.id] || 0
+                      const h = (mins / maxDayMinutes) * 100
+                      return h > 0 ? (
+                        <div key={u.id}
+                          title={`${u.name}: ${formatMinutes(mins)}`}
+                          style={{ width: '100%', height: h, background: u.avatar_color }}
+                        />
+                      ) : null
+                    })}
                   </div>
-                )
-              })}
-            </div>
-            {/* Legend */}
-            {displayUsers.length > 1 && (
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                {displayUsers.map(u => (
-                  <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: 2, background: u.avatar_color }} />
-                    <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{u.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                  {/* Date label */}
+                  <span style={{
+                    fontSize: '0.6rem',
+                    color: isToday ? 'var(--accent)' : 'var(--muted)',
+                    fontWeight: isToday ? 700 : 400,
+                    visibility: showLabel ? 'visible' : 'hidden',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {formatDayLabel(dayKey)}
+                  </span>
+                </div>
+              )
+            })}
           </div>
-        )}
+
+          {/* Legend */}
+          {displayUsers.length > 1 && (
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+              {displayUsers.map(u => (
+                <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: 2, background: u.avatar_color }} />
+                  <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{u.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Task breakdown */}
         {taskBreakdown.length > 0 && (
@@ -215,7 +246,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--muted)' }}>
             <p style={{ fontSize: '2rem', margin: '0 0 0.5rem' }}>📊</p>
-            <p style={{ margin: 0 }}>Šajā periodā vēl nav apstiprinātu izpilžu.</p>
+            <p style={{ margin: 0 }}>Nav apstiprinātu izpilžu šajā periodā.</p>
           </div>
         )}
       </div>
