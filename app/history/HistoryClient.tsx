@@ -73,7 +73,7 @@ export default function HistoryClient({ completions, users, session }: Props) {
       const dk = getDayKey(c.completed_at)
       if (!map[dk]) map[dk] = {}
       const uid = c.user_id
-      map[dk][uid] = (map[dk][uid] || 0) + (c.tasks?.time_value || 0)
+      map[dk][uid] = (map[dk][uid] || 0) + (c.awarded_minutes ?? c.tasks?.time_value ?? 0)
     }
     // Return all days in range, including empty ones
     return getDayRange(rangeDays).map(dk => [dk, map[dk] || {}] as [string, Record<string, number>])
@@ -84,12 +84,12 @@ export default function HistoryClient({ completions, users, session }: Props) {
     const map: Record<string, number> = {}
     for (const c of filtered) {
       const name = c.tasks?.name || 'Nezināms'
-      map[name] = (map[name] || 0) + (c.tasks?.time_value || 0)
+      map[name] = (map[name] || 0) + (c.awarded_minutes ?? c.tasks?.time_value ?? 0)
     }
     return Object.entries(map).sort(([, a], [, b]) => b - a)
   }, [filtered])
 
-  const totalMinutes = filtered.reduce((s, c) => s + (c.tasks?.time_value || 0), 0)
+  const totalMinutes = filtered.reduce((s, c) => s + (c.awarded_minutes ?? c.tasks?.time_value ?? 0), 0)
   const maxDayMinutes = Math.max(1, ...dailyData.map(([, u]) => Object.values(u).reduce((s, v) => s + v, 0)))
   const maxTaskMinutes = taskBreakdown[0]?.[1] || 1
 

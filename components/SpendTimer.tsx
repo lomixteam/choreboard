@@ -55,6 +55,7 @@ export default function SpendTimer({ availableMinutes, rewards, userId }: Props)
       .catch(() => setLoading(false))
   }, [])
 
+
   // Tick while session active
   useEffect(() => {
     if (session && !session.stopped_at) {
@@ -69,6 +70,17 @@ export default function SpendTimer({ availableMinutes, rewards, userId }: Props)
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [session])
+
+  useEffect(() => {
+  function handleVisibilityChange() {
+    if (document.visibilityState === 'visible' && session) {
+      const secs = Math.floor((Date.now() - new Date(session.started_at).getTime()) / 1000)
+      setElapsed(secs)
+    }
+  }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+}, [session])
 
   async function startSession() {
     if (availableMinutes <= 0) return

@@ -16,7 +16,7 @@ export default async function HistoryPage() {
   const [completionsRes, usersRes] = await Promise.all([
     supabaseAdmin
       .from('completions')
-      .select('user_id, completed_at, actual_duration, tasks ( name, time_value ), users ( id, name, avatar_color )')
+      .select('user_id, completed_at, actual_duration, awarded_minutes, tasks ( name, time_value ), users ( id, name, avatar_color )')
       .eq('status', 'approved')
       .gte('completed_at', since.toISOString())
       .order('completed_at', { ascending: true }),
