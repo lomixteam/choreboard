@@ -9,6 +9,7 @@ interface Completion {
   user_id: string
   completed_at: string
   actual_duration: number | null
+  awarded_minutes: number | null
   tasks: { name: string; time_value: number } | null
   users: { id: string; name: string; avatar_color: string } | null
 }
